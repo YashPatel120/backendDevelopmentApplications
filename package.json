@@ -1,0 +1,4 @@
+"scripts": {
+    "start": "ts-node src/app.ts",
+    "build": "tsc"
+  }
