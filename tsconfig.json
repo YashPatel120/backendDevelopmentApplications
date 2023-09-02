@@ -1,9 +1,16 @@
 {
+  
     "compilerOptions": {
       "target": "ES6",
       "module": "CommonJS",
       "outDir": "./dist",
       "rootDir": "./src",
       "strict": true
+    }
+  ,
+  
+    "scripts": {
+      "start": "ts-node src/app.ts",
+      "build": "tsc"
     }
   }

@@ -1,20 +1,18 @@
+// src/app.ts
 import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
 import sqlite3 from 'sqlite3';
+import { Task } from './types'; // Create a types.ts file for defining types
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
+// Create a SQLite database connection
+const db = new sqlite3.Database(':memory:'); // You can replace ':memory:' with a file path for a persistent database
 
-const db = new sqlite3.Database(':memory:'); 
-interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+// Define API endpoints
+app.use(express.json());
 
-
+// Create a table for tasks in the database
 db.serialize(() => {
   db.run('CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, completed BOOLEAN)');
 });
@@ -30,34 +28,34 @@ app.get('/tasks', (req: Request, res: Response) => {
 });
 
 app.post('/tasks', (req: Request, res: Response) => {
-  const { title, completed } = req.body;
-  if (!title || typeof completed !== 'boolean') {
+  const task: Task = req.body;
+  if (!task.title || typeof task.completed !== 'boolean') {
     res.status(400).json({ error: 'Invalid input' });
     return;
   }
 
-  db.run('INSERT INTO tasks (title, completed) VALUES (?, ?)', [title, completed], function (err) {
+  db.run('INSERT INTO tasks (title, completed) VALUES (?, ?)', [task.title, task.completed], function (err) {
     if (err) {
       res.status(500).json({ error: 'Database error' });
     } else {
-      res.json({ id: this.lastID, title, completed });
+      res.json({ id: this.lastID, ...task });
     }
   });
 });
 
 app.put('/tasks/:id', (req: Request, res: Response) => {
   const { id } = req.params;
-  const { title, completed } = req.body;
-  if (!title || typeof completed !== 'boolean') {
+  const task: Task = req.body;
+  if (!task.title || typeof task.completed !== 'boolean') {
     res.status(400).json({ error: 'Invalid input' });
     return;
   }
 
-  db.run('UPDATE tasks SET title = ?, completed = ? WHERE id = ?', [title, completed, id], (err) => {
+  db.run('UPDATE tasks SET title = ?, completed = ? WHERE id = ?', [task.title, task.completed, id], (err) => {
     if (err) {
       res.status(500).json({ error: 'Database error' });
     } else {
-      res.json({ id: +id, title, completed });
+      res.json({ id: +id, ...task });
     }
   });
 });
