@@ -7,22 +7,18 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-// Create a SQLite database connection
-const db = new sqlite3.Database(':memory:'); // You can replace ':memory:' with a file path for a persistent database
-
-// Define a simple Task model
+const db = new sqlite3.Database(':memory:'); 
 interface Task {
   id: number;
   title: string;
   completed: boolean;
 }
 
-// Create a table for tasks in the database
+
 db.serialize(() => {
   db.run('CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, completed BOOLEAN)');
 });
 
-// Define API endpoints
 app.get('/tasks', (req: Request, res: Response) => {
   db.all('SELECT * FROM tasks', (err, rows) => {
     if (err) {
